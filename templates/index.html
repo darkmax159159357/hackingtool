@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackingTool Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-skull-crossbones"></i>
+                    <span>HackingTool</span>
+                </div>
+                <div class="version">v1.1.0</div>
+            </div>
+            <nav class="sidebar-nav" id="categoryList"></nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="topbar-title" id="topbarTitle">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="topbar-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search tools..." id="searchInput">
+                </div>
+            </header>
+
+            <div class="content-area" id="contentArea">
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-logo">
+                        <i class="fas fa-skull-crossbones"></i>
+                    </div>
+                    <h1>HackingTool Dashboard</h1>
+                    <p>All-in-one Ethical Hacking Toolkit</p>
+                    <div class="stats-grid" id="statsGrid"></div>
+                    <div class="welcome-actions" id="welcomeActions"></div>
+                </div>
+
+                <div class="category-header-bar" id="categoryHeaderBar" style="display:none;">
+                    <div class="category-header-info">
+                        <h2 id="categoryHeaderTitle"></h2>
+                        <span class="category-header-count" id="categoryHeaderCount"></span>
+                    </div>
+                    <button class="action-btn install-btn" id="installAllBtn" onclick="installAllCategory()">
+                        <i class="fas fa-download"></i> Install All Tools
+                    </button>
+                </div>
+
+                <div class="tools-grid" id="toolsGrid" style="display:none;"></div>
+
+                <div class="tool-detail" id="toolDetail" style="display:none;">
+                    <div class="detail-header">
+                        <button class="back-btn" id="backBtn">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <h2 id="detailTitle"></h2>
+                        <span class="installed-badge" id="installedBadge" style="display:none;">
+                            <i class="fas fa-check-circle"></i> Installed
+                        </span>
+                    </div>
+                    <div class="detail-body">
+                        <div class="detail-info">
+                            <p id="detailDesc"></p>
+                            <a id="detailUrl" href="#" target="_blank" class="project-link" style="display:none;">
+                                <i class="fas fa-external-link-alt"></i> <span></span>
+                            </a>
+                        </div>
+                        <div class="detail-actions" id="detailActions"></div>
+                        <div class="terminal-section" id="terminalSection" style="display:none;">
+                            <div class="terminal-header">
+                                <div class="terminal-dots">
+                                    <span class="dot red"></span>
+                                    <span class="dot yellow"></span>
+                                    <span class="dot green"></span>
+                                </div>
+                                <span class="terminal-title" id="terminalTitle">Terminal</span>
+                                <button class="terminal-stop" id="terminalStop" style="display:none;">
+                                    <i class="fas fa-stop"></i> Stop
+                                </button>
+                            </div>
+                            <div class="terminal-body" id="terminalBody"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="global-terminal" id="globalTerminal" style="display:none;">
+                    <div class="terminal-section">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </div>
+                            <span class="terminal-title" id="globalTerminalTitle">Batch Install</span>
+                            <button class="terminal-stop" id="globalTerminalStop" style="display:none;">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+                        <div class="terminal-body" id="globalTerminalBody"></div>
+                    </div>
+                </div>
+
+                <div class="workflow-page" id="workflowPage" style="display:none;">
+                    <div class="workflow-target-section">
+                        <h2><i class="fas fa-crosshairs"></i> <span class="wf-label-en">Target Configuration</span> <span class="wf-label-ar">إعدادات الهدف</span></h2>
+                        <div class="workflow-target-form">
+                            <div class="wf-input-group">
+                                <label>
+                                    <span class="wf-label-en">Target URL / IP</span>
+                                    <span class="wf-label-ar">عنوان الهدف</span>
+                                </label>
+                                <input type="text" id="wfTarget" class="tool-input" placeholder="example.com or 192.168.1.1">
+                            </div>
+                            <div class="wf-input-group wf-port-group">
+                                <label>
+                                    <span class="wf-label-en">Port</span>
+                                    <span class="wf-label-ar">المنفذ</span>
+                                </label>
+                                <input type="number" id="wfPort" class="tool-input" placeholder="80" value="80">
+                            </div>
+                            <button class="action-btn wf-start-btn" id="wfStartBtn" onclick="startWorkflow()">
+                                <i class="fas fa-rocket"></i> <span class="wf-label-en">Start Workflow</span> <span class="wf-label-ar">بدء سير العمل</span>
+                            </button>
+                            <button class="action-btn wf-stop-btn" id="wfStopBtn" style="display:none;" onclick="stopWorkflow()">
+                                <i class="fas fa-stop-circle"></i> <span class="wf-label-en">Stop Workflow</span> <span class="wf-label-ar">إيقاف سير العمل</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="workflow-progress" id="wfProgress" style="display:none;">
+                        <div class="wf-progress-info">
+                            <span id="wfProgressLabel" class="wf-progress-label">Phase 1 of 6 — Reconnaissance</span>
+                            <span id="wfProgressPct" class="wf-progress-pct">0%</span>
+                        </div>
+                        <div class="wf-progress-bar">
+                            <div class="wf-progress-fill" id="wfProgressFill" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-phases" id="wfPhases" style="display:none;">
+                        <div class="wf-tabs" id="wfTabs"></div>
+                        <div class="wf-tab-content" id="wfTabContent">
+                            <div class="wf-phase-actions" id="wfPhaseActions"></div>
+                            <div class="terminal-section wf-terminal">
+                                <div class="terminal-header">
+                                    <div class="terminal-dots">
+                                        <span class="dot red"></span>
+                                        <span class="dot yellow"></span>
+                                        <span class="dot green"></span>
+                                    </div>
+                                    <span class="terminal-title" id="wfTerminalTitle">Output</span>
+                                </div>
+                                <div class="terminal-body wf-terminal-body" id="wfTerminalBody"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const state = {
+            categories: [],
+            currentCategory: null,
+            currentTools: [],
+            currentTask: null,
+        };
+
+        async function loadCategories() {
+            const res = await fetch("/api/categories");
+            state.categories = await res.json();
+            renderSidebar();
+            renderWelcome();
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById("categoryList");
+            nav.innerHTML = `<div class="nav-item active" onclick="showWelcome()">
+                <i class="fas fa-home"></i><span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-id="workflow" onclick="showWorkflow()">
+                <i class="fas fa-project-diagram"></i>
+                <span>Security Workflow</span>
+            </div>` + state.categories.map(cat => `
+                <div class="nav-item" data-id="${cat.id}" onclick="selectCategory('${cat.id}')">
+                    <i class="fas fa-${cat.icon}"></i>
+                    <span>${cat.name}</span>
+                    <span class="badge">${cat.tool_count}</span>
+                </div>
+            `).join("");
+        }
+
+        async function renderWelcome() {
+            const grid = document.getElementById("statsGrid");
+            let total = state.categories.reduce((s, c) => s + c.tool_count, 0);
+            let installedCount = 0;
+            try {
+                const fetches = state.categories.map(cat => fetch(`/api/category/${cat.id}`).then(r => r.json()));
+                const results = await Promise.all(fetches);
+                for (const data of results) {
+                    installedCount += data.tools.filter(t => t.installed).length;
+                }
+            } catch(e) {}
+            grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">${state.categories.length}</span>
+                        <span class="stat-label">Categories</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-tools"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">${total}</span>
+                        <span class="stat-label">Total Tools</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">${installedCount}</span>
+                        <span class="stat-label">Installed</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">v1.1</span>
+                        <span class="stat-label">Version</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showWelcome() {
+            state.currentCategory = null;
+            document.getElementById("welcomeScreen").style.display = "";
+            document.getElementById("toolsGrid").style.display = "none";
+            document.getElementById("toolDetail").style.display = "none";
+            document.getElementById("categoryHeaderBar").style.display = "none";
+            document.getElementById("globalTerminal").style.display = "none";
+            document.getElementById("workflowPage").style.display = "none";
+            document.getElementById("topbarTitle").innerHTML = '<i class="fas fa-home"></i><span>Dashboard</span>';
+            setActiveNav(null);
+        }
+
+        function setActiveNav(catId) {
+            document.querySelectorAll(".nav-item").forEach(el => {
+                el.classList.remove("active");
+                if (catId === null && !el.dataset.id) el.classList.add("active");
+                if (el.dataset.id === catId) el.classList.add("active");
+            });
+        }
+
+        async function selectCategory(catId) {
+            setActiveNav(catId);
+            const res = await fetch(`/api/category/${catId}`);
+            const data = await res.json();
+            state.currentCategory = data;
+            state.currentTools = data.tools;
+
+            document.getElementById("topbarTitle").innerHTML = `<i class="fas fa-${data.icon}"></i><span>${data.name}</span>`;
+            document.getElementById("welcomeScreen").style.display = "none";
+            document.getElementById("toolDetail").style.display = "none";
+            document.getElementById("globalTerminal").style.display = "none";
+            document.getElementById("workflowPage").style.display = "none";
+
+            const headerBar = document.getElementById("categoryHeaderBar");
+            headerBar.style.display = "";
+            document.getElementById("categoryHeaderTitle").textContent = data.name;
+            document.getElementById("categoryHeaderCount").textContent = `${data.tools.length} tools`;
+
+            const installable = data.tools.filter(t => t.installable && !t.installed);
+            document.getElementById("installAllBtn").style.display = installable.length > 0 ? "" : "none";
+
+            renderToolsGrid(data.tools);
+            document.getElementById("toolsGrid").style.display = "";
+
+            if (window.innerWidth < 768) {
+                document.getElementById("sidebar").classList.remove("open");
+            }
+        }
+
+        function renderToolsGrid(tools) {
+            const grid = document.getElementById("toolsGrid");
+            if (!tools.length) {
+                grid.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No tools in this category</p></div>';
+                return;
+            }
+            grid.innerHTML = tools.map((tool, idx) => `
+                <div class="tool-card ${tool.installed ? 'installed' : ''}" onclick="showToolDetail(${idx})">
+                    <div class="tool-card-header">
+                        <h3>${escapeHtml(tool.title)}</h3>
+                        <div class="tool-badges">
+                            ${tool.installed ? '<span class="badge installed-b"><i class="fas fa-check"></i></span>' : ''}
+                            ${tool.installable ? '<span class="badge install">Install</span>' : ''}
+                            ${tool.runnable ? '<span class="badge run">Run</span>' : ''}
+                            ${tool.has_sub_tools ? '<span class="badge sub">Collection</span>' : ''}
+                        </div>
+                    </div>
+                    ${tool.desc_en ? `<p class="tool-desc desc-en"><i class="fas fa-globe"></i> ${escapeHtml(tool.desc_en)}</p>` : ''}
+                    ${tool.desc_ar ? `<p class="tool-desc desc-ar" dir="rtl"><i class="fas fa-language"></i> ${escapeHtml(tool.desc_ar)}</p>` : ''}
+                    ${!tool.desc_en && !tool.desc_ar ? `<p class="tool-desc">${escapeHtml(tool.description || "No description available")}</p>` : ''}
+                    ${tool.usage ? `<div class="tool-usage-hint" onclick="event.stopPropagation()"><i class="fas fa-terminal"></i> ${escapeHtml(tool.usage)}</div>` : ''}
+                    ${tool.project_url ? `<div class="tool-url"><i class="fas fa-link"></i> ${escapeHtml(tool.project_url)}</div>` : ''}
+                </div>
+            `).join("");
+        }
+
+        function showToolDetail(idx) {
+            const tool = state.currentTools[idx];
+            if (!tool) return;
+
+            document.getElementById("toolsGrid").style.display = "none";
+            document.getElementById("welcomeScreen").style.display = "none";
+            document.getElementById("categoryHeaderBar").style.display = "none";
+            document.getElementById("globalTerminal").style.display = "none";
+            document.getElementById("workflowPage").style.display = "none";
+            document.getElementById("toolDetail").style.display = "";
+
+            document.getElementById("detailTitle").textContent = tool.title;
+
+            let descHtml = '';
+            if (tool.desc_en) {
+                descHtml += `<div class="detail-desc-block desc-en"><i class="fas fa-globe"></i> ${escapeHtml(tool.desc_en)}</div>`;
+            }
+            if (tool.desc_ar) {
+                descHtml += `<div class="detail-desc-block desc-ar" dir="rtl"><i class="fas fa-language"></i> ${escapeHtml(tool.desc_ar)}</div>`;
+            }
+            if (!tool.desc_en && !tool.desc_ar) {
+                descHtml = `<div class="detail-desc-block">${escapeHtml(tool.description || "No description available")}</div>`;
+            }
+            if (tool.usage) {
+                descHtml += `<div class="detail-usage"><div class="usage-toggle" onclick="this.parentElement.classList.toggle('open')"><i class="fas fa-terminal"></i> <span>Usage Guide</span> <i class="fas fa-chevron-down usage-arrow"></i></div><div class="usage-content"><code>${escapeHtml(tool.usage)}</code></div></div>`;
+            }
+            document.getElementById("detailDesc").innerHTML = descHtml;
+
+            const badge = document.getElementById("installedBadge");
+            badge.style.display = tool.installed ? "" : "none";
+
+            const urlEl = document.getElementById("detailUrl");
+            if (tool.project_url) {
+                urlEl.style.display = "";
+                urlEl.href = tool.project_url.startsWith("http") ? tool.project_url : `https://${tool.project_url}`;
+                urlEl.querySelector("span").textContent = tool.project_url;
+            } else {
+                urlEl.style.display = "none";
+            }
+
+            const actions = document.getElementById("detailActions");
+            let html = "";
+
+            if (tool.installable) {
+                html += `<button class="action-btn install-btn" onclick="runToolAction('${escapeAttr(tool.tool_key)}', '${escapeAttr(tool.title)}', 'install')">
+                    <i class="fas fa-download"></i> ${tool.installed ? 'Reinstall' : 'Install'}
+                </button>`;
+            }
+            if (tool.runnable && !tool.has_inputs) {
+                html += `<button class="action-btn run-btn" onclick="runToolAction('${escapeAttr(tool.tool_key)}', '${escapeAttr(tool.title)}', 'run')">
+                    <i class="fas fa-play"></i> Run
+                </button>`;
+            }
+            if (tool.uninstall_commands && tool.uninstall_commands.length) {
+                html += `<button class="action-btn uninstall-btn" onclick="runToolAction('${escapeAttr(tool.tool_key)}', '${escapeAttr(tool.title)}', 'uninstall')">
+                    <i class="fas fa-trash"></i> Uninstall
+                </button>`;
+            }
+            if (tool.project_url) {
+                const url = tool.project_url.startsWith("http") ? tool.project_url : `https://${tool.project_url}`;
+                html += `<a class="action-btn link-btn" href="${url}" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Project Page
+                </a>`;
+            }
+
+            if (tool.has_sub_tools && tool.sub_tools.length) {
+                html += `<div class="sub-tools-section">
+                    <h3><i class="fas fa-folder-open"></i> Sub-Tools</h3>
+                    <div class="sub-tools-grid">
+                        ${tool.sub_tools.map(st => `
+                            <div class="sub-tool-card">
+                                <h4>${escapeHtml(st.title)}</h4>
+                                ${st.desc_en ? `<p class="desc-en"><i class="fas fa-globe"></i> ${escapeHtml(st.desc_en)}</p>` : ''}
+                                ${st.desc_ar ? `<p class="desc-ar" dir="rtl"><i class="fas fa-language"></i> ${escapeHtml(st.desc_ar)}</p>` : ''}
+                                ${!st.desc_en && !st.desc_ar ? `<p>${escapeHtml(st.description || "")}</p>` : ''}
+                                ${st.usage ? `<div class="sub-tool-usage"><i class="fas fa-terminal"></i> ${escapeHtml(st.usage)}</div>` : ''}
+                                <div class="sub-tool-actions">
+                                    ${st.installable ? `<button class="action-btn small install-btn" onclick="event.stopPropagation();runToolAction('${escapeAttr(st.tool_key)}', '${escapeAttr(st.title)}', 'install')"><i class="fas fa-download"></i></button>` : ''}
+                                    ${st.runnable ? `<button class="action-btn small run-btn" onclick="event.stopPropagation();runToolAction('${escapeAttr(st.tool_key)}', '${escapeAttr(st.title)}', 'run')"><i class="fas fa-play"></i></button>` : ''}
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>`;
+            }
+
+            if (tool.has_inputs && tool.input_fields) {
+                html += `<div class="tool-input-form" id="toolInputForm">
+                    <h3><i class="fas fa-keyboard"></i> Tool Parameters <span class="input-form-hint">Fill in the required fields and click Run</span></h3>
+                    <div class="input-fields-grid">
+                        ${tool.input_fields.map(field => `
+                            <div class="input-field-group">
+                                <label for="input_${field.name}">
+                                    <span class="label-en">${escapeHtml(field.label)}</span>
+                                    ${field.label_ar ? `<span class="label-ar" dir="rtl">${escapeHtml(field.label_ar)}</span>` : ''}
+                                    ${field.required ? '<span class="required-mark">*</span>' : '<span class="optional-mark">optional</span>'}
+                                </label>
+                                ${field.type === 'select' ? `
+                                    <select id="input_${field.name}" class="tool-input" data-name="${field.name}">
+                                        <option value="">-- Select --</option>
+                                        ${(field.options || []).map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt.toUpperCase())}</option>`).join('')}
+                                    </select>
+                                ` : `
+                                    <input type="${field.type || 'text'}" id="input_${field.name}" class="tool-input" 
+                                        data-name="${field.name}" placeholder="${escapeHtml(field.placeholder || '')}"
+                                        ${field.required ? 'required' : ''}>
+                                `}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="input-form-actions">
+                        <button class="action-btn run-btn run-with-inputs-btn" onclick="runToolWithInputs('${escapeAttr(tool.tool_key)}', '${escapeAttr(tool.title)}')">
+                            <i class="fas fa-play"></i> Run Tool
+                        </button>
+                        <button class="action-btn clear-btn" onclick="clearInputForm()">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </div>`;
+            }
+
+            if (tool.install_commands.length) {
+                html += `<div class="commands-section">
+                    <h3><i class="fas fa-terminal"></i> Install Commands</h3>
+                    <div class="commands-list">
+                        ${tool.install_commands.map(c => `<code>${escapeHtml(c)}</code>`).join("")}
+                    </div>
+                </div>`;
+            }
+            if (tool.run_commands.length) {
+                html += `<div class="commands-section">
+                    <h3><i class="fas fa-play-circle"></i> Run Commands</h3>
+                    <div class="commands-list">
+                        ${tool.run_commands.map(c => `<code>${escapeHtml(c)}</code>`).join("")}
+                    </div>
+                </div>`;
+            }
+
+            actions.innerHTML = html;
+
+            document.getElementById("terminalSection").style.display = "none";
+            document.getElementById("terminalBody").innerHTML = "";
+        }
+
+        document.getElementById("backBtn").addEventListener("click", () => {
+            document.getElementById("toolDetail").style.display = "none";
+            document.getElementById("toolsGrid").style.display = "";
+            document.getElementById("categoryHeaderBar").style.display = "";
+            if (state.currentCategory) {
+                selectCategory(state.currentCategory.id);
+            }
+        });
+
+        async function runToolWithInputs(toolKey, toolName) {
+            const inputs = {};
+            document.querySelectorAll('#toolInputForm .tool-input').forEach(el => {
+                const name = el.dataset.name;
+                const val = el.value.trim();
+                if (val) inputs[name] = val;
+            });
+
+            const requiredMissing = [];
+            document.querySelectorAll('#toolInputForm .tool-input[required]').forEach(el => {
+                if (!el.value.trim()) {
+                    requiredMissing.push(el.dataset.name);
+                    el.classList.add('input-error');
+                } else {
+                    el.classList.remove('input-error');
+                }
+            });
+
+            if (requiredMissing.length > 0) {
+                const section = document.getElementById("terminalSection");
+                const body = document.getElementById("terminalBody");
+                section.style.display = "";
+                body.innerHTML = `<div class="term-line error">Please fill in all required fields. | يرجى ملء جميع الحقول المطلوبة.</div>`;
+                return;
+            }
+
+            const section = document.getElementById("terminalSection");
+            const body = document.getElementById("terminalBody");
+            const stopBtn = document.getElementById("terminalStop");
+            const titleEl = document.getElementById("terminalTitle");
+
+            section.style.display = "";
+            body.innerHTML = `<div class="term-line system">$ Running ${toolName} with parameters...</div>\n`;
+            const paramsLine = document.createElement("div");
+            paramsLine.className = "term-line system";
+            paramsLine.textContent = `Parameters: ${JSON.stringify(inputs)}`;
+            body.appendChild(paramsLine);
+            titleEl.textContent = `Running ${toolName}`;
+            stopBtn.style.display = "";
+
+            try {
+                const res = await fetch("/api/run", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({tool_key: toolKey, action: "run", inputs}),
+                });
+                const data = await res.json();
+                if (data.error) {
+                    body.innerHTML += `<div class="term-line error">${data.error}</div>`;
+                    stopBtn.style.display = "none";
+                    return;
+                }
+                state.currentTask = data.task_id;
+
+                stopBtn.onclick = async () => {
+                    await fetch(`/api/task/${data.task_id}/stop`, {method: "POST"});
+                };
+
+                streamOutput(data.task_id, body, stopBtn);
+            } catch (err) {
+                body.innerHTML += `<div class="term-line error">Request failed: ${err.message}</div>`;
+                stopBtn.style.display = "none";
+            }
+        }
+
+        function clearInputForm() {
+            document.querySelectorAll('#toolInputForm .tool-input').forEach(el => {
+                el.value = '';
+                el.classList.remove('input-error');
+            });
+        }
+
+        async function runToolAction(toolKey, toolName, action) {
+            const section = document.getElementById("terminalSection");
+            const body = document.getElementById("terminalBody");
+            const stopBtn = document.getElementById("terminalStop");
+            const titleEl = document.getElementById("terminalTitle");
+
+            const actionLabel = action === 'install' ? 'Installing' : action === 'uninstall' ? 'Uninstalling' : 'Running';
+            section.style.display = "";
+            body.innerHTML = `<div class="term-line system">$ ${actionLabel} ${toolName}...</div>\n`;
+            titleEl.textContent = `${actionLabel} ${toolName}`;
+            stopBtn.style.display = "";
+
+            try {
+                const res = await fetch("/api/run", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({tool_key: toolKey, action}),
+                });
+                const data = await res.json();
+                if (data.error) {
+                    body.innerHTML += `<div class="term-line error">${data.error}</div>`;
+                    stopBtn.style.display = "none";
+                    return;
+                }
+                state.currentTask = data.task_id;
+
+                stopBtn.onclick = async () => {
+                    await fetch(`/api/task/${data.task_id}/stop`, {method: "POST"});
+                };
+
+                streamOutput(data.task_id, body, stopBtn);
+            } catch (err) {
+                body.innerHTML += `<div class="term-line error">Request failed: ${err.message}</div>`;
+                stopBtn.style.display = "none";
+            }
+        }
+
+        async function installAllCategory() {
+            if (!state.currentCategory) return;
+
+            document.getElementById("toolsGrid").style.display = "none";
+            const gt = document.getElementById("globalTerminal");
+            gt.style.display = "";
+            const body = document.getElementById("globalTerminalBody");
+            const stopBtn = document.getElementById("globalTerminalStop");
+            const titleEl = document.getElementById("globalTerminalTitle");
+
+            titleEl.textContent = `Installing all tools in ${state.currentCategory.name}`;
+            body.innerHTML = `<div class="term-line system">$ Batch installing all tools in ${state.currentCategory.name}...</div>\n`;
+            stopBtn.style.display = "";
+
+            const res = await fetch("/api/install-all", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({category_id: state.currentCategory.id}),
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                body.innerHTML += `<div class="term-line error">${data.error}: ${data.message || ''}</div>`;
+                stopBtn.style.display = "none";
+                return;
+            }
+
+            const infoLine = document.createElement("div");
+            infoLine.className = "term-line system";
+            infoLine.textContent = `Installing ${data.tool_count} tools: ${data.tools.join(", ")}`;
+            body.appendChild(infoLine);
+
+            stopBtn.onclick = async () => {
+                await fetch(`/api/task/${data.task_id}/stop`, {method: "POST"});
+            };
+
+            streamOutput(data.task_id, body, stopBtn);
+        }
+
+        function ansiToHtml(text) {
+            const ansiMap = {
+                '1': 'font-weight:bold',
+                '2': 'opacity:0.7',
+                '91': 'color:#ff5555',
+                '92': 'color:#50fa7b',
+                '93': 'color:#f1fa8c',
+                '94': 'color:#6272a4',
+                '95': 'color:#ff79c6',
+                '96': 'color:#8be9fd',
+                '0': '',
+            };
+            let escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let result = '';
+            let i = 0;
+            let openSpans = 0;
+            while (i < escaped.length) {
+                if (escaped[i] === '\x1b' && escaped[i+1] === '[') {
+                    let j = i + 2;
+                    while (j < escaped.length && escaped[j] !== 'm') j++;
+                    if (j < escaped.length) {
+                        const codes = escaped.substring(i+2, j).split(';');
+                        let styles = [];
+                        for (const code of codes) {
+                            if (code === '0' || code === '') {
+                                while (openSpans > 0) { result += '</span>'; openSpans--; }
+                            } else if (ansiMap[code]) {
+                                styles.push(ansiMap[code]);
+                            }
+                        }
+                        if (styles.length > 0) {
+                            result += `<span style="${styles.join(';')}">`;
+                            openSpans++;
+                        }
+                        i = j + 1;
+                        continue;
+                    }
+                }
+                result += escaped[i];
+                i++;
+            }
+            while (openSpans > 0) { result += '</span>'; openSpans--; }
+            return result;
+        }
+
+        function streamOutput(taskId, body, stopBtn) {
+            const evtSource = new EventSource(`/api/stream/${taskId}`);
+            evtSource.onmessage = (e) => {
+                const msg = JSON.parse(e.data);
+                if (msg.line) {
+                    const line = document.createElement("div");
+                    line.className = "term-line";
+                    if (msg.line.startsWith("SUCCESS:")) line.className += " success";
+                    if (msg.line.startsWith("FAILED:")) line.className += " error";
+                    if (msg.line.startsWith("===")) line.className += " system";
+                    line.innerHTML = ansiToHtml(msg.line);
+                    body.appendChild(line);
+                    body.scrollTop = body.scrollHeight;
+                }
+                if (msg.done) {
+                    evtSource.close();
+                    const statusLine = document.createElement("div");
+                    const isSuccess = msg.status === 'completed' && msg.exit_code === 0;
+                    statusLine.className = `term-line system ${isSuccess ? 'success' : 'error'}`;
+                    statusLine.textContent = isSuccess
+                        ? `Process completed successfully (exit code: ${msg.exit_code})`
+                        : `Process ${msg.status} (exit code: ${msg.exit_code})`;
+                    body.appendChild(statusLine);
+                    if (!isSuccess) {
+                        const hint = document.createElement("div");
+                        hint.className = "term-line system";
+                        hint.textContent = "Note: Some tools require root/sudo access or specific Linux packages (apt) that are not available in this environment. The tool source code was cloned successfully but the setup script may have failed.";
+                        body.appendChild(hint);
+                    }
+                    body.scrollTop = body.scrollHeight;
+                    stopBtn.style.display = "none";
+                }
+            };
+            evtSource.onerror = () => {
+                evtSource.close();
+                stopBtn.style.display = "none";
+            };
+        }
+
+        let searchDebounce = null;
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => doSearch(e.target.value), 300);
+        });
+
+        async function doSearch(query) {
+            query = query.toLowerCase().trim();
+            if (!query) {
+                if (state.currentCategory) {
+                    selectCategory(state.currentCategory.id);
+                } else {
+                    showWelcome();
+                }
+                return;
+            }
+
+            let allTools = [];
+            const fetches = state.categories.map(cat => fetch(`/api/category/${cat.id}`).then(r => r.json()));
+            const results = await Promise.all(fetches);
+            for (const data of results) {
+                for (const tool of data.tools) {
+                    tool._category = data.name;
+                    allTools.push(tool);
+                    if (tool.has_sub_tools && tool.sub_tools) {
+                        for (const st of tool.sub_tools) {
+                            st._category = data.name;
+                            st._parent = tool.title;
+                            allTools.push(st);
+                        }
+                    }
+                }
+            }
+
+            const filtered = allTools.filter(t =>
+                t.title.toLowerCase().includes(query) ||
+                (t.description && t.description.toLowerCase().includes(query)) ||
+                (t.desc_en && t.desc_en.toLowerCase().includes(query)) ||
+                (t.desc_ar && t.desc_ar.includes(query))
+            );
+
+            state.currentTools = filtered;
+            document.getElementById("welcomeScreen").style.display = "none";
+            document.getElementById("toolDetail").style.display = "none";
+            document.getElementById("categoryHeaderBar").style.display = "none";
+            document.getElementById("globalTerminal").style.display = "none";
+            document.getElementById("workflowPage").style.display = "none";
+            document.getElementById("toolsGrid").style.display = "";
+            document.getElementById("topbarTitle").innerHTML = `<i class="fas fa-search"></i><span>Search: "${escapeHtml(query)}" (${filtered.length} results)</span>`;
+            renderToolsGrid(filtered);
+        }
+
+        document.getElementById("menuToggle").addEventListener("click", () => {
+            document.getElementById("sidebar").classList.toggle("open");
+        });
+
+        function escapeHtml(text) {
+            const d = document.createElement("div");
+            d.textContent = text;
+            return d.innerHTML;
+        }
+
+        function escapeAttr(text) {
+            return text.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        }
+
+        const wfState = {
+            running: false,
+            phases: [],
+            activeTab: null,
+            streams: {},
+        };
+
+        function showWorkflow() {
+            state.currentCategory = null;
+            document.getElementById("welcomeScreen").style.display = "none";
+            document.getElementById("toolsGrid").style.display = "none";
+            document.getElementById("toolDetail").style.display = "none";
+            document.getElementById("categoryHeaderBar").style.display = "none";
+            document.getElementById("globalTerminal").style.display = "none";
+            document.getElementById("workflowPage").style.display = "";
+            document.getElementById("topbarTitle").innerHTML = '<i class="fas fa-project-diagram"></i><span>Security Workflow</span>';
+            setActiveNav("workflow");
+            if (window.innerWidth < 768) {
+                document.getElementById("sidebar").classList.remove("open");
+            }
+        }
+
+        async function startWorkflow() {
+            const target = document.getElementById("wfTarget").value.trim();
+            const port = document.getElementById("wfPort").value.trim() || "80";
+
+            if (!target) {
+                alert("Please enter a target URL or IP address.\nيرجى إدخال عنوان الهدف.");
+                return;
+            }
+
+            document.getElementById("wfStartBtn").style.display = "none";
+            document.getElementById("wfStopBtn").style.display = "";
+            document.getElementById("wfTarget").disabled = true;
+            document.getElementById("wfPort").disabled = true;
+
+            try {
+                const res = await fetch("/api/workflow/start", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({target, port}),
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    resetWorkflowUI();
+                    return;
+                }
+
+                wfState.running = true;
+                wfState.phases = data.phases;
+                wfState.activeTab = data.phases[0].id;
+
+                document.getElementById("wfProgress").style.display = "";
+                document.getElementById("wfPhases").style.display = "";
+
+                renderWfTabs();
+                selectWfTab(data.phases[0].id);
+                pollWorkflowStatus();
+            } catch (err) {
+                alert("Failed to start workflow: " + err.message);
+                resetWorkflowUI();
+            }
+        }
+
+        function resetWorkflowUI() {
+            document.getElementById("wfStartBtn").style.display = "";
+            document.getElementById("wfStopBtn").style.display = "none";
+            document.getElementById("wfTarget").disabled = false;
+            document.getElementById("wfPort").disabled = false;
+            wfState.running = false;
+            Object.values(wfState.streams).forEach(es => { try { es.close(); } catch(e){} });
+            wfState.streams = {};
+        }
+
+        async function stopWorkflow() {
+            try {
+                await fetch("/api/workflow/stop", {method: "POST"});
+            } catch(e) {}
+            wfState.running = false;
+            resetWorkflowUI();
+            updateWfProgress(6, 6, "Workflow stopped | تم إيقاف سير العمل");
+        }
+
+        function renderWfTabs() {
+            const tabs = document.getElementById("wfTabs");
+            tabs.innerHTML = wfState.phases.map(p => `
+                <div class="wf-tab ${p.id === wfState.activeTab ? 'active' : ''}" data-phase="${p.id}" onclick="selectWfTab('${p.id}')">
+                    <span class="wf-tab-status" id="wfTabStatus_${p.id}"><i class="fas fa-clock"></i></span>
+                    <span class="wf-tab-name">${p.name}</span>
+                    <span class="wf-tab-name-ar">${p.name_ar}</span>
+                </div>
+            `).join("");
+        }
+
+        function selectWfTab(phaseId) {
+            wfState.activeTab = phaseId;
+            document.querySelectorAll(".wf-tab").forEach(t => {
+                t.classList.toggle("active", t.dataset.phase === phaseId);
+            });
+
+            const body = document.getElementById("wfTerminalBody");
+            body.innerHTML = "";
+            const title = document.getElementById("wfTerminalTitle");
+            const phase = wfState.phases.find(p => p.id === phaseId);
+            title.textContent = phase ? phase.name : "Output";
+
+            if (wfState.streams[phaseId]) {
+                try { wfState.streams[phaseId].close(); } catch(e) {}
+            }
+
+            const actions = document.getElementById("wfPhaseActions");
+            actions.innerHTML = `
+                <button class="action-btn wf-skip-btn" id="wfSkipBtn_${phaseId}" onclick="skipWorkflowPhase()" ${wfState.running ? '' : 'style="display:none"'}>
+                    <i class="fas fa-forward"></i> Skip | تخطي
+                </button>
+                <button class="action-btn wf-rerun-btn" id="wfRerunBtn_${phaseId}" onclick="rerunWorkflowPhase('${phaseId}')" style="display:none;">
+                    <i class="fas fa-redo"></i> Re-run | إعادة التشغيل
+                </button>
+            `;
+
+            streamWfPhase(phaseId, body);
+        }
+
+        function streamWfPhase(phaseId, body) {
+            const evtSource = new EventSource(`/api/workflow/stream/${phaseId}`);
+            wfState.streams[phaseId] = evtSource;
+
+            evtSource.onmessage = (e) => {
+                const msg = JSON.parse(e.data);
+                if (msg.line) {
+                    const line = document.createElement("div");
+                    line.className = "term-line";
+                    if (msg.line.startsWith("===")) line.className += " system";
+                    if (msg.line.startsWith("---")) line.className += " system";
+                    if (msg.line.startsWith("Error")) line.className += " error";
+                    if (msg.line.startsWith("SUCCESS")) line.className += " success";
+                    line.innerHTML = ansiToHtml(msg.line);
+                    body.appendChild(line);
+                    body.scrollTop = body.scrollHeight;
+                }
+                if (msg.done) {
+                    evtSource.close();
+                    updateWfTabStatus(phaseId, msg.status);
+                    const skipBtn = document.getElementById(`wfSkipBtn_${phaseId}`);
+                    const rerunBtn = document.getElementById(`wfRerunBtn_${phaseId}`);
+                    if (skipBtn) skipBtn.style.display = "none";
+                    if (rerunBtn && (msg.status === "completed" || msg.status === "failed")) {
+                        rerunBtn.style.display = "";
+                    }
+                }
+            };
+            evtSource.onerror = () => {
+                evtSource.close();
+            };
+        }
+
+        async function skipWorkflowPhase() {
+            try {
+                const res = await fetch("/api/workflow/skip", {method: "POST"});
+                const data = await res.json();
+                if (data.error) {
+                    console.warn("Skip failed:", data.error);
+                }
+            } catch(e) {
+                console.warn("Skip request failed:", e);
+            }
+        }
+
+        async function rerunWorkflowPhase(phaseId) {
+            const rerunBtn = document.getElementById(`wfRerunBtn_${phaseId}`);
+            if (rerunBtn) rerunBtn.style.display = "none";
+
+            try {
+                const res = await fetch(`/api/workflow/rerun/${phaseId}`, {method: "POST"});
+                const data = await res.json();
+                if (data.error) {
+                    const body = document.getElementById("wfTerminalBody");
+                    body.innerHTML = `<div class="term-line error">${data.error}</div>`;
+                    if (rerunBtn) rerunBtn.style.display = "";
+                    return;
+                }
+                const body = document.getElementById("wfTerminalBody");
+                body.innerHTML = "";
+                streamWfPhase(phaseId, body);
+                updateWfTabStatus(phaseId, "running");
+            } catch(e) {
+                if (rerunBtn) rerunBtn.style.display = "";
+                console.warn("Rerun request failed:", e);
+            }
+        }
+
+        function updateWfProgress(current, total, label) {
+            const pct = Math.round((current / total) * 100);
+            document.getElementById("wfProgressFill").style.width = pct + "%";
+            document.getElementById("wfProgressPct").textContent = pct + "%";
+            document.getElementById("wfProgressLabel").textContent = label;
+        }
+
+        function updateWfTabStatus(phaseId, status) {
+            const el = document.getElementById(`wfTabStatus_${phaseId}`);
+            if (!el) return;
+            const icons = {
+                pending: '<i class="fas fa-clock wf-status-pending"></i>',
+                running: '<i class="fas fa-spinner fa-spin wf-status-running"></i>',
+                completed: '<i class="fas fa-check-circle wf-status-completed"></i>',
+                failed: '<i class="fas fa-exclamation-circle wf-status-failed"></i>',
+                skipped: '<i class="fas fa-forward wf-status-skipped"></i>',
+                stopped: '<i class="fas fa-stop-circle wf-status-stopped"></i>',
+            };
+            el.innerHTML = icons[status] || icons.pending;
+        }
+
+        let wfPollInterval = null;
+        function pollWorkflowStatus() {
+            if (wfPollInterval) clearInterval(wfPollInterval);
+            wfPollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch("/api/workflow/status");
+                    if (!res.ok) {
+                        clearInterval(wfPollInterval);
+                        return;
+                    }
+                    const data = await res.json();
+
+                    data.phases.forEach(p => {
+                        updateWfTabStatus(p.id, p.status);
+                    });
+
+                    const completedCount = data.phases.filter(p => ["completed", "failed", "skipped", "stopped"].includes(p.status)).length;
+                    const currentPhase = data.current_phase < data.total_phases ? data.phases[data.current_phase] : null;
+                    const phaseName = currentPhase ? currentPhase.name : "Done";
+                    const phaseNum = Math.min(data.current_phase + 1, data.total_phases);
+
+                    if (data.status === "completed") {
+                        updateWfProgress(data.total_phases, data.total_phases, `Workflow completed | اكتمل سير العمل`);
+                        clearInterval(wfPollInterval);
+                        resetWorkflowUI();
+                    } else if (data.status === "stopped") {
+                        updateWfProgress(completedCount, data.total_phases, `Workflow stopped | تم إيقاف سير العمل`);
+                        clearInterval(wfPollInterval);
+                        resetWorkflowUI();
+                    } else {
+                        updateWfProgress(completedCount, data.total_phases, `Phase ${phaseNum} of ${data.total_phases} — ${phaseName}`);
+                    }
+                } catch(e) {
+                    clearInterval(wfPollInterval);
+                }
+            }, 1000);
+        }
+
+        loadCategories();
+    </script>
+</body>
+</html>
